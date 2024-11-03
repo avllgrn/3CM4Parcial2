@@ -3,22 +3,30 @@
 #include <time.h>
 using namespace std;
 
-class LSE{
+class LDE{
 private:
     class Nodo{
     public:
+        Nodo* previo;
         int dato;
         Nodo* siguiente;
         Nodo(void){
+            previo = NULL;
             dato = 0;
             siguiente = NULL;
         };
-        Nodo(int d, Nodo* s){
+        Nodo(Nodo* p, int d, Nodo* s){
+            previo = p;
             dato = d;
             siguiente = s;
         };
         void muestraTuEstado(void){
-            cout<<"| "<<dato<<" -> ";
+            cout<<"| ";
+            if(previo==NULL)
+                cout << "NULL";
+            else
+                cout<< previo;
+            cout<<" <- "<<dato<<" -> ";
             if(siguiente==NULL)
                 cout << "NULL";
             else
@@ -27,60 +35,34 @@ private:
         };
     };
     Nodo* busca(int d){
-        Nodo* aux;
-        aux = primero;
-        while(aux!=NULL){
-            if(aux->dato == d)
-                return aux;
-
-            aux = aux->siguiente;
+        if(!estaVacia()){
+            Nodo* aux1 = primero;
+            Nodo* aux2 = ultimo;
+            while(aux1!=aux2 && aux1->siguiente!=aux2
+                  && aux1->dato!=d && aux2->dato!=d){
+                aux1 = aux1->siguiente;
+                aux2 = aux2->previo;
+            }
+            if(aux1->dato==d)
+                return aux1;
+            else if(aux2->dato==d)
+                return aux2;
         }
-        return NULL;
+        return false;
     };
     Nodo* primero;
     Nodo* ultimo;
-public:
-    LSE(void){
+    public:
+    LDE(void){
         primero = NULL;
         ultimo = NULL;
     };
-    ~LSE(void){
-        cout<<endl<<"Se destruye LSE..."<<endl;
-        liberaLSE();
-        cout<<endl<<"LSE destruida..."<<endl;
+    ~LDE(void){
+        liberaLDE();
     };
-    void insertaAlFinal(int d){
-        if(estaVacia()){
-            ultimo = new Nodo(d, NULL);
-            primero = ultimo;
-        }
-        else{
-            ultimo->siguiente = new Nodo(d, NULL);
-            ultimo = ultimo->siguiente;
-        }
-    };
-    void insertaAlInicio(int d){
-        if(estaVacia()){
-            primero = new Nodo(d, NULL);
-            ultimo = primero;
-        }
-        else{
-            primero = new Nodo(d, primero);
-        }
-    };
-    void inserta(int d){
-        if(estaVacia()||d<=primero->dato)
-            insertaAlInicio(d);
-        else if(d>=ultimo->dato)
-            insertaAlFinal(d);
-        else{
-            Nodo* aux1=primero;
-            Nodo* aux2=primero->siguiente;
-            while(d>aux2->dato){
-                aux1=aux1->siguiente;
-                aux2=aux2->siguiente;
-            }
-            aux1->siguiente = new Nodo(d, aux2);
+    void liberaLDE(void){
+        while(!estaVacia()){
+            cout<<eliminaAlInicio()<<endl;
         }
     };
     int eliminaAlInicio(void){
@@ -91,6 +73,7 @@ public:
             aux = primero;
             primero = primero->siguiente;
             delete aux;
+            primero->previo = NULL;
         }
         else if(!estaVacia() && primero==ultimo){
             d = primero->dato;
@@ -105,29 +88,38 @@ public:
         Nodo* aux;
         if(!estaVacia()){
             d = ultimo->dato;
-            if(primero == ultimo){
+            if(primero==ultimo){
                 delete ultimo;
-                primero = NULL;
                 ultimo = NULL;
+                primero = NULL;
             }
             else{
-                aux=primero;
-                while(aux->siguiente != ultimo){
-                    aux = aux->siguiente;
-                }
-                delete ultimo;
-                aux->siguiente = NULL;
-                ultimo = aux;
+                aux = ultimo;
+                ultimo = ultimo->previo;
+                delete aux;
+                ultimo->siguiente = NULL;
             }
+            return d;
         }
-        return d;
     };
-    bool estaVacia(void){
-        return primero==NULL && ultimo==NULL;
+    void insertaAlInicio(int d){
+        if(estaVacia()){
+            primero = new Nodo(NULL, d, NULL);
+            ultimo = primero;
+        }
+        else{
+            primero->previo = new Nodo(NULL, d, primero);
+            primero = primero->previo;
+        }
     };
-    void liberaLSE(void){
-        while(!estaVacia()){
-            cout<<eliminaAlInicio()<<" ";
+    void insertaAlFinal(int d){
+        if(estaVacia()){
+            ultimo = new Nodo(NULL, d, NULL);
+            primero = ultimo;
+        }
+        else{
+            ultimo->siguiente = new Nodo(ultimo, d, NULL);
+            ultimo = ultimo->siguiente;
         }
     };
     void muestraDePrimeroAUltimo(void){
@@ -139,156 +131,55 @@ public:
         }
     };
     void muestraDeUltimoAPrimero(void){
-        Nodo* aux1;
-        Nodo* aux2;
-
-        if(!estaVacia() && primero==ultimo)
-            cout<<ultimo->dato;
-        else if(!estaVacia() && primero!=ultimo){
-            aux2=ultimo;
-            do{
-                aux1=primero;
-                while(aux1->siguiente != aux2){
-                    aux1 = aux1->siguiente;
-                }
-                cout<<aux2->dato<<" ";
-                aux2=aux1;
-            }while(aux2!=primero);
-            cout<<aux2->dato<<" ";
+        Nodo* aux;
+        aux = ultimo;
+        while(aux!=NULL){
+            cout<<aux->dato<<" ";
+            aux = aux->previo;
         }
+    };
+    bool estaVacia(void){
+        return primero==NULL && primero==ultimo;
     };
     bool buscaDato(int d){
         return busca(d)!=NULL;
-    };
-    void modificaDato(int d, int x){
-        Nodo* aqui = busca(d);
-        if(aqui!=NULL){
-            aqui->dato = x;
-        }
-    };
-    int acumulaNodosEnLista(void){
-        Nodo* aux;
-        int s=0;
-        aux=primero;
-        while(aux!=NULL){
-            s = s+aux->dato;
-            aux=aux->siguiente;
-        }
-        return s;
-    };
-    int cuentaNodosEnLista(void){
-        Nodo* aux;
-        int s=0;
-        aux=primero;
-        while(aux!=NULL){
-            ++s;
-            aux=aux->siguiente;
-        }
-        return s;
-    };
-    float promediaNodosEnLista(){
-        Nodo* aux;
-        float s=0;
-        int n=0;
-        aux=primero;
-        while(aux!=NULL){
-            s = s+aux->dato;
-            n++;
-            aux=aux->siguiente;
-        }
-        return s/n;
-    };
-    void agregaListaEnLista(LSE& Copia){
-        Nodo* aux;
-        aux=primero;
-        while(aux!=NULL){
-            Copia.insertaAlFinal(aux->dato);
-            aux=aux->siguiente;
-        }
-    };
-    void copiaListaEnLista(LSE& Copia){
-        Nodo* aux;
-        Copia.liberaLSE();
-        aux=primero;
-        while(aux!=NULL){
-            Copia.insertaAlFinal(aux->dato);
-            aux=aux->siguiente;
-        }
-    };
-    void aplicaBurbujaALista(void){
-        if(!estaVacia()){
-            int temp, n, i, intento=0;
-            n = cuentaNodosEnLista();
-            Nodo* aux1;
-            Nodo* aux2;
-            Nodo* aux3=ultimo->siguiente;
-            aux1 = primero;
-            aux2 = primero->siguiente;
-            while(aux1!=aux3){
-                while(aux2!=aux3){
-                    //cout<<"Intento"<<++intento<<endl;
-                    if(aux2->dato < aux1->dato){
-                        temp = aux1->dato;
-                        aux1->dato = aux2->dato;
-                        aux2->dato = temp;
-                    }
-                    aux1 = aux1->siguiente;
-                    aux2 = aux2->siguiente;
-                }
-                aux3 = aux1;
-                aux1 = primero;
-                aux2 = primero->siguiente;
-            }
-        }
     };
 };
 
 int main(){
     srand(time(NULL));
-    LSE L1;
-    int i,n,x;
+    LDE L;
+    int x, i=0;
 
-    cout<<"Cuantos nodos? ";cin>>n;
-    for(i=0; i<n; i++){
+    for(i=0; i<5; i++){
         x = rand()%100;
-        //cout<<endl<<"Se inserta "<<x<<endl;
-        L1.insertaAlFinal(x);
-    }
-    cout<<"L"<<endl;
-    L1.muestraDePrimeroAUltimo();
-    cout<<endl<<endl;
-    cout<<"Tiene "<<L1.cuentaNodosEnLista()<<" nodos"<<endl
-        <<"Suman "<<L1.acumulaNodosEnLista()<<endl
-        <<"Promedian "<<L1.promediaNodosEnLista()<<endl;
+        L.insertaAlInicio(x);
+    };
+    for(i=0; i<5; i++){
+        x = rand()%100;
+        L.insertaAlFinal(x);
+    };
+
+    cout<<"L de inicio a fin"<<endl;
+    L.muestraDePrimeroAUltimo();cout<<endl;
+    cout<<"L de fin a inicio"<<endl;
+    L.muestraDeUltimoAPrimero();cout<<endl;
     cout<<endl<<endl;
 
-    LSE L2, Copia;
-    cout<<"L2"<<endl;
-    L2.muestraDePrimeroAUltimo();
-    cout<<endl<<endl;
-    cout<<"Copia"<<endl;
-    Copia.muestraDePrimeroAUltimo();
-    cout<<endl<<endl;
-
-    L1.copiaListaEnLista(Copia);
-    L1.copiaListaEnLista(Copia);
-    L1.agregaListaEnLista(L2);
-    L1.agregaListaEnLista(L2);
+    cout<<"Se borra al primero "<<L.eliminaAlInicio()<<endl;
+    cout<<"L de inicio a fin"<<endl;
+    L.muestraDePrimeroAUltimo();cout<<endl;
+    cout<<"L de fin a inicio"<<endl;
+    L.muestraDeUltimoAPrimero();cout<<endl;
     cout<<endl<<endl;
 
-    cout<<"L2 = L1 agregada 2 veces"<<endl;
-    L2.muestraDePrimeroAUltimo();
-    cout<<endl<<endl;
-    cout<<"Copia = L1 'copiada' 2 veces"<<endl;
-    Copia.muestraDePrimeroAUltimo();
+    cout<<"Se borra al ultimo "<<L.eliminaAlFinal()<<endl;
+    cout<<"L de inicio a fin"<<endl;
+    L.muestraDePrimeroAUltimo();cout<<endl;
+    cout<<"L de fin a inicio"<<endl;
+    L.muestraDeUltimoAPrimero();cout<<endl;
     cout<<endl<<endl;
 
-    Copia.aplicaBurbujaALista();
-    cout<<"Copia ordenada con burbuja"<<endl;
-    Copia.muestraDePrimeroAUltimo();
-    cout<<endl<<endl;
-    system("pause");
-    cout<<endl<<endl<<"Destructor:";
-
+    cout<<"Destructor:"<<endl;
     return 0;
 }
