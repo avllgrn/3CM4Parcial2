@@ -166,22 +166,126 @@ public:
             aqui->dato = x;
         }
     };
+    int acumulaNodosEnLista(void){
+        Nodo* aux;
+        int s=0;
+        aux=primero;
+        while(aux!=NULL){
+            s = s+aux->dato;
+            aux=aux->siguiente;
+        }
+        return s;
+    };
+    int cuentaNodosEnLista(void){
+        Nodo* aux;
+        int s=0;
+        aux=primero;
+        while(aux!=NULL){
+            ++s;
+            aux=aux->siguiente;
+        }
+        return s;
+    };
+    float promediaNodosEnLista(){
+        Nodo* aux;
+        float s=0;
+        int n=0;
+        aux=primero;
+        while(aux!=NULL){
+            s = s+aux->dato;
+            n++;
+            aux=aux->siguiente;
+        }
+        return s/n;
+    };
+    void agregaListaEnLista(LSE& Copia){
+        Nodo* aux;
+        aux=primero;
+        while(aux!=NULL){
+            Copia.insertaAlFinal(aux->dato);
+            aux=aux->siguiente;
+        }
+    };
+    void copiaListaEnLista(LSE& Copia){
+        Nodo* aux;
+        Copia.liberaLSE();
+        aux=primero;
+        while(aux!=NULL){
+            Copia.insertaAlFinal(aux->dato);
+            aux=aux->siguiente;
+        }
+    };
+    void aplicaBurbujaALista(void){
+        if(!estaVacia()){
+            int temp, n, i, intento=0;
+            n = cuentaNodosEnLista();
+            Nodo* aux1;
+            Nodo* aux2;
+            Nodo* aux3=ultimo->siguiente;
+            aux1 = primero;
+            aux2 = primero->siguiente;
+            while(aux1!=aux3){
+                while(aux2!=aux3){
+                    //cout<<"Intento"<<++intento<<endl;
+                    if(aux2->dato < aux1->dato){
+                        temp = aux1->dato;
+                        aux1->dato = aux2->dato;
+                        aux2->dato = temp;
+                    }
+                    aux1 = aux1->siguiente;
+                    aux2 = aux2->siguiente;
+                }
+                aux3 = aux1;
+                aux1 = primero;
+                aux2 = primero->siguiente;
+            }
+        }
+    };
 };
 
 int main(){
     srand(time(NULL));
-    LSE L;
+    LSE L1;
     int i,n,x;
 
     cout<<"Cuantos nodos? ";cin>>n;
     for(i=0; i<n; i++){
         x = rand()%100;
-        cout<<endl<<"Se inserta "<<x<<endl;
-        L.inserta(x);
-        cout<<"L"<<endl;
-        L.muestraDePrimeroAUltimo();
+        //cout<<endl<<"Se inserta "<<x<<endl;
+        L1.insertaAlFinal(x);
     }
+    cout<<"L"<<endl;
+    L1.muestraDePrimeroAUltimo();
+    cout<<endl<<endl;
+    cout<<"Tiene "<<L1.cuentaNodosEnLista()<<" nodos"<<endl
+        <<"Suman "<<L1.acumulaNodosEnLista()<<endl
+        <<"Promedian "<<L1.promediaNodosEnLista()<<endl;
+    cout<<endl<<endl;
 
+    LSE L2, Copia;
+    cout<<"L2"<<endl;
+    L2.muestraDePrimeroAUltimo();
+    cout<<endl<<endl;
+    cout<<"Copia"<<endl;
+    Copia.muestraDePrimeroAUltimo();
+    cout<<endl<<endl;
+
+    L1.copiaListaEnLista(Copia);
+    L1.copiaListaEnLista(Copia);
+    L1.agregaListaEnLista(L2);
+    L1.agregaListaEnLista(L2);
+    cout<<endl<<endl;
+
+    cout<<"L2 = L1 agregada 2 veces"<<endl;
+    L2.muestraDePrimeroAUltimo();
+    cout<<endl<<endl;
+    cout<<"Copia = L1 'copiada' 2 veces"<<endl;
+    Copia.muestraDePrimeroAUltimo();
+    cout<<endl<<endl;
+
+    Copia.aplicaBurbujaALista();
+    cout<<"Copia ordenada con burbuja"<<endl;
+    Copia.muestraDePrimeroAUltimo();
     cout<<endl<<endl;
     system("pause");
     cout<<endl<<endl<<"Destructor:";
